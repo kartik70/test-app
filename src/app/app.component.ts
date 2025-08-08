@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { SwaggerApiDesignerComponent } from './swagger-api-designer/swagger-api-designer.component';
+import { ChatComponent } from "./chat/chat.component";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [SwaggerApiDesignerComponent, ChatComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
