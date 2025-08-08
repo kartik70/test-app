@@ -96,6 +96,7 @@
   border-left: 1px solid rgba(0, 0, 0, 0.02);
   border-right: 1px solid rgba(0, 0, 0, 0.02);
   border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+  min-height: 0;
 }
 
 /* background layer tile (data-URI) */
@@ -119,6 +120,11 @@
   flex-direction: column;
   gap: 6px;
   box-sizing: border-box;
+  scrollbar-width: none; /* Firefox */
+}
+
+.wa-messages::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 /* message row and alignment */
