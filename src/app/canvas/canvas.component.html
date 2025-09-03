@@ -1,0 +1,62 @@
+<div class="graph-container">
+  <ngx-graph
+    [links]="links"
+    [nodes]="nodes"
+    [curve]="curve"
+    [layout]="'dagre'"
+    [zoomToFit$]="zoomToFit$"
+    [autoCenter]="true"
+    [autoZoom]="true"
+    [panOnZoom]="true"
+    [enableZoom]="true"
+    class="ngx-graph"
+  >
+    <ng-template #defs>
+      <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
+        <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
+      </svg:marker>
+    </ng-template>
+
+    <ng-template #nodeTemplate let-node>
+      <svg:g class="node-group">
+        <svg:rect
+          [attr.width]="120"
+          [attr.height]="60"
+          [attr.x]="0"
+          [attr.y]="0" 
+          class="node-rect"
+        />
+        <svg:image
+          [attr.href]="node.data.icon"
+          x="-16"
+          y="-16"
+          width="32"
+          height="32"
+        />
+        <svg:text class="node-label" [attr.y]="40">{{ node.label }}</svg:text>
+      </svg:g>
+    </ng-template>
+
+    <ng-template #linkTemplate let-link>
+      <svg:g class="link-group">
+        <svg:path
+          class="edge"
+          [attr.d]="link.d"
+          [attr.marker-end]="'url(#arrow)'"
+        ></svg:path>
+        <svg:foreignObject
+          width="30"
+          height="30"
+          [attr.x]="getLinkMidPoint(link).x - 15"
+          [attr.y]="getLinkMidPoint(link).y - 15"
+        >
+          <button class="add-button">+</button>
+        </svg:foreignObject>
+      </svg:g>
+    </ng-template>
+  </ngx-graph>
+</div>
+
+<div class="controls">
+  <button (click)="fitGraph()">Fit to Screen</button>
+</div>
