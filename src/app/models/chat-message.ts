@@ -1,4 +1,4 @@
-export type MsgType = 'text' | 'image' | 'video' | 'file' | 'buttons' | 'typing';
+export type MsgType = 'text' | 'image' | 'video' | 'file' | 'buttons' | 'typing' | 'template';
 
 export interface QuickButton {
   label: string;
@@ -16,4 +16,8 @@ export interface ChatMessage {
   buttons?: QuickButton[];   // for quick replies / structured messages
   timestamp?: string;        // ISO or formatted time
   status?: 'pending'|'sent'|'delivered'|'read'; // outgoing status
+  // template specific fields (header/body/footer)
+  headerText?: string;
+  bodyText?: string;
+  footerText?: string;
 }

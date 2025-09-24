@@ -151,6 +151,7 @@
   line-height: 1.33;
   word-wrap: break-word;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+  overflow: hidden; /* keep inner elements within bubble radius */
 }
 
 .wa-msg-row.wa-mine .wa-bubble {
@@ -212,6 +213,33 @@
   cursor: pointer;
   font-weight: 500;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* Template-specific layout to mimic WhatsApp button list */
+.wa-template-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.wa-template-button {
+  display: block;
+  width: 100%;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0a6c4a;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 10px 12px;
+  text-align: center;
+  box-sizing: border-box; /* prevent overflow due to border/padding */
+}
+
+/* Footer muted style similar to WhatsApp */
+.wa-template-footer {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #667781;
 }
 
 /* meta (time + ticks) */

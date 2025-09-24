@@ -43,7 +43,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     // subscribe to incoming messages
     this.stomp.incoming$
       .pipe(takeUntil(this.destroy$))
-      .subscribe((msg) => this.onIncoming(msg));
+      .subscribe((msg: any) => this.onIncoming(this.transformIncoming(msg)));
 
     // demo seed messages (optional)
     this.seedDemoMessages();
@@ -59,8 +59,20 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.messages = [
       { id: this.generateId(), sender: 'Friend', type: 'text', content: 'Hey! Are you free today?', timestamp: this.now() },
       { id: this.generateId(), sender: this.me, type: 'text', content: 'Yes — free after 7 PM.', timestamp: this.now(), status: 'read' },
-      { id: this.generateId(), sender: 'Friend', type: 'image', mediaUrl: 'https://picsum.photos/300/200', timestamp: this.now() },
-      { id: this.generateId(), sender: 'Friend', type: 'buttons', buttons: [{ label: 'Sounds good', action: 'ok' }, { label: 'Not today', action: 'no' }], timestamp: this.now() }
+      {
+        id: this.generateId(),
+        sender: 'Friend',
+        type: 'template',
+        headerText: 'Hi {{name}}',
+        bodyText: 'Thanks for showing interest in our internet broadband! How can we help?',
+        footerText: 'hihihih',
+        buttons: [
+          { label: 'Check Availability', action: 'CHECK' },
+          { label: 'Plans & Pricing', action: 'PLANS' },
+          { label: 'Talk to Expert', action: 'EXPERT' }
+        ],
+        timestamp: this.now()
+      }
     ];
     this.cdr.markForCheck();
     setTimeout(() => this.scrollToBottom(), 60);
@@ -109,49 +121,52 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.stomp.send(undefined, msg);
   }
 
+  // Map incoming API payloads into ChatMessage, supporting template payload shown by user
+  private transformIncoming(raw: any): ChatMessage {
+    try {
+      // Detect template-like payload
+      if (raw && typeof raw === 'object' && raw.header && raw.body && raw.footer) {
+        const buttons: QuickButton[] = [];
+        for (let i = 1; i <= 3; i++) {
+          const key = `button_${i}`;
+          const b = (raw as any)[key];
+          if (b && b.type === 'button' && typeof b.stringContent === 'string' && b.stringContent.trim()) {
+            buttons.push({ label: b.stringContent.trim(), action: b.buttonSubType });
+          }
+        }
+
+        const msg: ChatMessage = {
+          id: this.generateId(),
+          sender: 'Friend',
+          type: 'template',
+          headerText: raw.header?.stringContent ?? '',
+          bodyText: raw.body?.stringContent ?? '',
+          footerText: raw.footer?.stringContent ?? '',
+          buttons,
+          timestamp: this.now()
+        };
+        return msg;
+      }
+
+      // If it already matches our contract, let it pass through
+      if (raw && raw.type) return raw as ChatMessage;
+
+      // Fallbacks
+      if (typeof raw === 'string') {
+        return { id: this.generateId(), sender: 'Friend', type: 'text', content: raw, timestamp: this.now() };
+      }
+    } catch {}
+
+    // Unknown payload → show as textified JSON for debugging
+    return { id: this.generateId(), sender: 'Friend', type: 'text', content: JSON.stringify(raw), timestamp: this.now() };
+  }
+
   handleButtonClick(btn: QuickButton) {
     // For simplicity, send the label as a message
     this.newMessage = btn.label;
     this.sendText();
   }
 
-  async onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-
-      let type: ChatMessage['type'] = 'file';
-      if (file.type.startsWith('image/')) type = 'image';
-      else if (file.type.startsWith('video/')) type = 'video';
-
-      const clientId = this.generateId();
-      const msg: ChatMessage = {
-        clientId,
-        sender: this.me,
-        type,
-        mediaUrl: dataUrl,
-        fileName: file.name,
-        timestamp: this.now(),
-        status: 'pending'
-      };
-
-      this.messages.push(msg);
-      this.cdr.markForCheck();
-      this.scrollToBottom();
-
-      // send the file payload to backend (in prod upload and send URL)
-      this.stomp.send(undefined, msg);
-
-      // reset input
-      input.value = '';
-    };
-
-    reader.readAsDataURL(file);
-  }
 
   // trackBy for ngFor performance
   trackById(_: number, item: ChatMessage) {

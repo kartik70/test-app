@@ -27,6 +27,15 @@
 
               <a *ngIf="msg.type === 'file'" class="wa-file" [href]="msg.mediaUrl" target="_blank">{{ msg.fileName }}</a>
 
+              <div *ngIf="msg.type === 'template'" class="wa-template">
+                <div *ngIf="msg.headerText" class="wa-text wa-template-header"><strong>{{ msg.headerText }}</strong></div>
+                <div *ngIf="msg.bodyText" class="wa-text wa-template-body">{{ msg.bodyText }}</div>
+                <div *ngIf="msg.footerText" class="wa-text wa-template-footer">{{ msg.footerText }}</div>
+                <div *ngIf="msg.buttons?.length" class="wa-buttons wa-template-buttons">
+                  <button class="wa-quick wa-template-button" *ngFor="let b of (msg.buttons | slice:0:3)" (click)="handleButtonClick(b)">{{ b.label }}</button>
+                </div>
+              </div>
+
               <div *ngIf="msg.type === 'buttons'" class="wa-buttons">
                 <button class="wa-quick" *ngFor="let b of msg.buttons" (click)="handleButtonClick(b)">{{ b.label }}</button>
               </div>
@@ -57,11 +66,6 @@
     </div>
 
     <div class="wa-input-bar">
-      <label class="wa-attach" title="Attach">
-        <img class="wa-attach-icon" src="assets/attachment.svg" alt="attach" />
-        <input type="file" (change)="onFileSelected($event)" accept="image/*,video/*,application/pdf" />
-      </label>
-
       <input class="wa-input" type="text" placeholder="Type a message" [(ngModel)]="newMessage" (keyup.enter)="sendText()" />
 
       <button class="wa-send" (click)="sendText()" aria-label="Send">➤</button>
